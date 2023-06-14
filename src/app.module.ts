@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import {DB_NAME, DB_PASSWORD, DB_USER, DB_PORT} from './utils/dev'
+import { UsersModule } from './users/users.module';
 @Module({
   controllers: [],
   providers: [],
@@ -17,8 +18,9 @@ import {DB_NAME, DB_PASSWORD, DB_USER, DB_PORT} from './utils/dev'
       ],
       autoLoadModels: true
     }),
+    UsersModule,
   ],
-
+  
 
 })
 export class AppModule { }
