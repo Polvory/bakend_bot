@@ -1,6 +1,6 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import {API_LINK} from '../utils/dev'
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Headers } from '@nestjs/common'
 import {jobService} from './job.service'
 import { CreateJobDto } from './dto/job_create.dto'
 
@@ -14,10 +14,13 @@ export class JobController {
     @ApiResponse({ status: 200, type:[CreateJobDto] })
     @Get('/list')
     @HttpCode(HttpStatus.OK)
-    get() {
-        return this.jobService.get()
+    get(@Headers() headers) {
+        return console.log('AUTHH LOGG', headers.host)
+        // return this.jobService.get()
     }
-
+    // async login () {
+        
+    //   }
 
     @ApiOperation({ summary: 'Создание' })
     @ApiResponse({ status: 200, type:CreateJobDto })
