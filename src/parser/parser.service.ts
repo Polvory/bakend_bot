@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { HABR, HABR_PAGE } from '../utils/links_parser'
+import { HABR, HABR_PAGE, DESIGNER ,DESIGNER_PAGE} from '../utils/links_parser'
 import * as needle from 'needle'
 import * as cheerio from 'cheerio'
 import { InjectModel } from "@nestjs/sequelize";
@@ -61,6 +61,54 @@ export class ParserService {
                 })
             }
         })
+    }
+
+    @Cron(CronExpression.EVERY_4_HOURS)
+    async getDesigner() {
+        console.log('загрузка Designer... ')
+        const JobsData = this.JobsRepository
+        needle.get(DESIGNER, function (error, response) {
+            if (!error && response.statusCode == 200) {
+                var $ = cheerio.load(response.body);
+                $('.z_bx00kk__i').each((index, value) => {
+                    let href = $(value).children().children('a').attr('href')
+                    let linkVacancy = `${DESIGNER_PAGE}${href}`
+                    needle.get(linkVacancy, async function (error, response) {
+                        var $ = cheerio.load(response.body);
+                        let pauloud = {
+                            company: '',
+                            title: '',
+                            grade: '',
+                            link: linkVacancy,
+                            description: '',
+                            is_send: false
+                        
+                        }
+                        pauloud.title =  $('h1').text()
+                        pauloud.company =  $('.z_b_72194kjs___intro_v2__www').children('a').text().replace(/\\n/g, '')
+                    //    / pauloud.description =  $('z_b_72194kjs_2_body_inner').text().replace(/\\n/g, '')
+                        $('.z_b_72194kjs_2_body_inner').children().each((index, value) => {
+
+                            pauloud.description += `${$(value).text().replace(/\s+/g, " ")}\n`
+
+
+                        })
+
+                        console.log(pauloud)
+                        let Validate = await JobsData.findAll({ where: { company: pauloud.company, title: pauloud.title, link: linkVacancy } })
+
+                        if (Validate.length <= 0 && pauloud.title != '' && pauloud.company != '' && pauloud.link != '') {
+                            await JobsData.create(pauloud)
+                            console.log('Добавляем в бд')
+                        } else {
+                            console.log('Такая ваканися есть, идем дальше')
+                        }
+                       
+                    })
+                })
+            }
+        })
+        
     }
 
 }

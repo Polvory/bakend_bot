@@ -28,7 +28,7 @@ export class jobService {
 
       
     async test_parser(){
-        let res = await this.parserService.getHabr()
+        let res = await this.parserService.getDesigner()
         
         return res
     }
